@@ -10,6 +10,29 @@ function App() {
 	const [output, setOutput] = useState(null);
 	const [output2, setOutput2] = useState(null);
 	const [pass, setPass] = useState("");
+	const [selectedFile, setSelectedFile] = useState();
+	const [isFilePicked, setIsFilePicked] = useState(false);
+
+	const changeHandler = (event) => {
+		setSelectedFile(event.target.files[0]);
+		setIsFilePicked(true);
+	};
+	const handleSubmission = () => {
+		const formData = new FormData();
+		formData.append("File", selectedFile);
+
+		fetch("http://192.168.97.44:5000/uploadFile", {
+			method: "POST",
+			body: formData,
+		})
+			.then((response) => response.json())
+			.then((result) => {
+				console.log("Success:", result);
+			})
+			.catch((error) => {
+				console.error("Error:", error);
+			});
+	};
 
 	const handleClick = (e) => {
 		axios
@@ -68,8 +91,38 @@ function App() {
 			) : (
 				""
 			)}
+			<input
+				type="file"
+				className="custom-file-input"
+				name="file"
+				onChange={changeHandler}
+			/>
+			{isFilePicked ? (
+				<div>
+					<p>
+						<span>Filename:</span> {selectedFile.name}
+					</p>
+					<p>
+						<span>Filetype: </span>
+						{selectedFile.type}
+					</p>
+					<p>
+						<span>Size in bytes:</span> {selectedFile.size}
+					</p>
+					<p>
+						<span>lastModifiedDate: </span>
+						{selectedFile.lastModifiedDate.toLocaleDateString()}
+					</p>
+				</div>
+			) : (
+				<h3>Select a file to show details</h3>
+			)}
+			<div>
+				<button disabled={!isFilePicked} onClick={handleSubmission}>
+					Submit
+				</button>
+			</div>
 		</div>
 	);
 }
-
 export default App;
