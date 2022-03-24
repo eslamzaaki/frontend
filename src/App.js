@@ -10,16 +10,21 @@ function App() {
 	const [output, setOutput] = useState(null);
 	const [output2, setOutput2] = useState(null);
 	const [pass, setPass] = useState("");
-	const [selectedFile, setSelectedFile] = useState();
-	const [isFilePicked, setIsFilePicked] = useState(false);
+	const [files, setFiles] = useState();
+	const [isfilePicked, setisFilePicked] = useState(false);
+	const [uploadComplete, setUploadComplete] = useState(false);
 
 	const changeHandler = (event) => {
-		setSelectedFile(event.target.files[0]);
-		setIsFilePicked(true);
+		setFiles(event.target.files);
+		setisFilePicked(true);
 	};
 	const handleSubmission = () => {
 		const formData = new FormData();
-		formData.append("File", selectedFile);
+
+		for (let i = 0; i < files.length; i++) {
+			console.log(files[i]);
+			formData.append("files", files[i]);
+		}
 
 		fetch("http://192.168.97.44:5000/uploadFile", {
 			method: "POST",
@@ -28,6 +33,7 @@ function App() {
 			.then((response) => response.json())
 			.then((result) => {
 				console.log("Success:", result);
+				setUploadComplete(true);
 			})
 			.catch((error) => {
 				console.error("Error:", error);
@@ -92,35 +98,22 @@ function App() {
 				""
 			)}
 			<input
+				multiple
 				type="file"
 				className="custom-file-input"
 				name="file"
 				onChange={changeHandler}
 			/>
-			{isFilePicked ? (
-				<div>
-					<p>
-						<span>Filename:</span> {selectedFile.name}
-					</p>
-					<p>
-						<span>Filetype: </span>
-						{selectedFile.type}
-					</p>
-					<p>
-						<span>Size in bytes:</span> {selectedFile.size}
-					</p>
-					<p>
-						<span>lastModifiedDate: </span>
-						{selectedFile.lastModifiedDate.toLocaleDateString()}
-					</p>
-				</div>
-			) : (
-				<h3>Select a file to show details</h3>
-			)}
+			<p>
+				<span>Number of Files uploaded :</span>
+				{files ? " " + files.length : " 0"}
+			</p>
+
 			<div>
-				<button disabled={!isFilePicked} onClick={handleSubmission}>
+				<button disabled={!isfilePicked} onClick={handleSubmission}>
 					Submit
 				</button>
+				{uploadComplete ? <p>Upload successfully completed</p> : ""}
 			</div>
 		</div>
 	);
